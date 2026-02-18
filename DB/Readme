@@ -1,0 +1,44 @@
+CREATE A POSTGRESS DATABASE AND USER USING DOCKER - 
+
+
+- Step 1 — Pull & run PostgreSQL container
+
+docker run -d --name pg-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15
+
+- Step 2 — Exec into Postgres container
+
+docker exec -it pg-db psql -U postgres
+
+- Step 3 — Create DB and user
+
+CREATE DATABASE tododb;
+
+CREATE USER todo_user WITH PASSWORD 'password123';
+
+GRANT ALL PRIVILEGES ON DATABASE tododb TO todo_user;
+
+- Step 4 — Switch DB:
+
+\c tododb
+
+-Step 5 — Create table:
+
+CREATE TABLE todos (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  completed BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+- Step 6 — Exit container
+
+\q
+
+
+-- USING DOCKER FILE ---
+
+docker build -t todo-postgres .
+
+docker run -d --name todo-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres todo-postgres
+
+docker exec -it todo-db psql -U todo_user -d tododb
