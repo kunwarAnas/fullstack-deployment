@@ -1,0 +1,63 @@
+pipeline {
+  agent any
+
+  environment {
+    REGISTRY = 'docker.io/yourname'
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        git branch: 'main', url: 'https://github.com/kunwarAnas/fullstack-deployment.git'
+      }
+    }
+
+    stage('Build Backend Image') {
+      steps {
+        sh 'docker build -t fullstack-python:${BUILD_NUMBER} backend/'
+      }
+    }
+
+    stage('Build Frontend Image') {
+      steps {
+        sh 'docker build -t fullstack-react:${BUILD_NUMBER} frontend/'
+      }
+    }
+
+    stage('Push Docker Image to Docker Hub') {
+            steps {
+                echo '📦 Pushing image to Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'docker_cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker tag fullstack-python:${BUILD_NUMBER} kunwaranas/fullstack-python:${BUILD_NUMBER}
+                        docker push kunwaranas/fullstack-python:${BUILD_NUMBER}
+
+                        echo "pushing frontend image..."
+
+                        docker tag fullstack-react:${BUILD_NUMBER} kunwaranas/fullstack-react:${BUILD_NUMBER}
+                        docker push kunwaranas/fullstack-react:${BUILD_NUMBER}
+                        
+                    """
+                }
+          }
+    }
+
+    stage('Clean Docker Images') {
+            steps {
+                echo "Deleting unused Docker images..."
+                sh "docker image prune -af"
+            }
+    }
+  }
+
+  post {
+        success {
+            echo '✅ All stages passed successfully and image pushed to Docker Hub!'
+        }
+        failure {
+            echo '❌ Pipeline failed. Please check the logs.'
+        }
+  }
+}
