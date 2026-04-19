@@ -1,0 +1,26 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: notes-app-dep
+  namespace: notes-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notes-app-fe
+  template:
+    metadata:
+      name: notes-app-fe-pod
+      labels:
+        app: notes-app-fe
+    spec:
+      containers:
+        - name: notes-frontend
+          image: frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          livenessProbe: 
+            httpGet:
+              path: /
+              port: 80
