@@ -98,9 +98,10 @@ pipeline {
       steps {
         echo "Deploying to Kubernetes cluster..."   
         sh """
-            kubectl get nodes
-            kubectl set image deployment/python-backend-dep python-backend-dep=kunwaranas/fullstack-python:${BUILD_NUMBER} -n notes-app
-            kubectl set image deployment/notes-app-dep notes-app-dep=kunwaranas/fullstack-react:${BUILD_NUMBER} -n notes-app
+            kubectl get pods -n notes-app
+            kubectl set image deployment/python-backend-dep python-backend=kunwaranas/fullstack-python:${BUILD_NUMBER} -n notes-app
+            kubectl set image deployment/notes-app-dep notes-frontend=kunwaranas/fullstack-react:${BUILD_NUMBER} -n notes-app
+            kubectl get pods -n notes-app
           """
         // withCredentials([file(credentialsId: 'kube_config', variable: 'KUBECONFIG')]) {
         //     sh """
