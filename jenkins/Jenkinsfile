@@ -35,12 +35,11 @@ pipeline {
       steps {
           withSonarQubeEnv('sonar-server') {
               sh """
-              which sonar-scanner
               $SONAR_HOME/bin/sonar-scanner \
-                -Dsonar.projectName=Fullstack Frontend \
+                -Dsonar.projectName=fullstack-frontend \
                 -Dsonar.projectKey=fullstack-frontend \
-                -Dsonar.sources=frontend \
-                -Dsonar.host.url=http://host.docker.internal:9000 \
+                -Dsonar.sources=./frontend \
+                -Dsonar.host.url=http://192.168.1.17:9000 \
                 -Dsonar.login=${SONAR_TOKEN}
               """
         }
