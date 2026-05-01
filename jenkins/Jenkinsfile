@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     REGISTRY = 'docker.io/yourname'
+    SONAR_TOKEN = credentials('sonar_token')
   }
 
   stages {
@@ -22,6 +23,28 @@ pipeline {
     stage('Build Frontend Image') {
       steps {
         sh 'docker build -t fullstack-react:${BUILD_NUMBER} frontend/'
+      }
+    }
+
+    stage('SonarQube Frontend Analysis') {
+      steps {
+          withSonarQubeEnv('sonar_server') {
+              sh """
+              sonar-scanner \
+                -Dsonar.projectKey=fullstack-frontend \
+                -Dsonar.sources=frontend \
+                -Dsonar.host.url=http://host.docker.internal:9000 \
+                -Dsonar.login=${SONAR_TOKEN}
+              """
+        }
+      } 
+    }
+
+    stage("Quality Gate") {
+      steps {
+          timeout(time: 2, unit: 'MINUTES') {
+              waitForQualityGate abortPipeline: true
+          }
       }
     }
 
