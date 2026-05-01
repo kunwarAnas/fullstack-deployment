@@ -6,7 +6,7 @@ pipeline {
     SONAR_TOKEN = credentials('sonar_token')
     SONAR_HOME = tool 'sonar-scanner'
   }
-  
+
   stages {
 
     stage('Checkout') {
@@ -90,6 +90,21 @@ pipeline {
                     """
                 }
           }
+    }
+
+
+
+    stage("Deploy to Kubernetes") {
+      steps {
+        echo "Deploying to Kubernetes cluster..."   
+        withCredentials([file(credentialsId: 'kube-config', variable: 'KUBECONFIG')]) {
+            sh """
+            kubectl get nodes
+            kubectl set image deployment/python-backend-dep python-backend-dep=kunwaranas/fullstack-python:${BUILD_NUMBER} -n notes-app
+            kubectl set image deployment/notes-app-dep notes-app-dep=kunwaranas/fullstack-react:${BUILD_NUMBER} -n notes-app
+            """
+        }
+      }
     }
 
     stage('Clean Docker Images') {

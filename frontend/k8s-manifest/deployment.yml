@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: notes-frontend
-          image: frontend:latest
+          image: kunwaranas/fullstack-react:20
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
