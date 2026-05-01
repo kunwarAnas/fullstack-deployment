@@ -6,11 +6,7 @@ pipeline {
     SONAR_TOKEN = credentials('sonar_token')
     SONAR_HOME = tool 'sonar-scanner'
   }
-
-  // tools {
-  //   sonarRunner 'sonar-scanner'
-  // }
-
+  
   stages {
 
     stage('Checkout') {
@@ -46,7 +42,30 @@ pipeline {
       } 
     }
 
-    stage("Quality Gate") {
+    stage("Frontend Quality Gate Check") {
+      steps {
+          timeout(time: 5, unit: 'MINUTES') {
+              waitForQualityGate abortPipeline: true
+          }
+      }
+    }
+
+    stage('SonarQube Backend Analysis') {
+      steps {
+          withSonarQubeEnv('sonar-server') {
+              sh """
+              $SONAR_HOME/bin/sonar-scanner \
+                -Dsonar.projectName=fullstack-python-backend \
+                -Dsonar.projectKey=fullstack-python-backend \
+                -Dsonar.sources=./python-backend \
+                -Dsonar.host.url=http://192.168.1.17:9000 \
+                -Dsonar.token=${SONAR_TOKEN}
+              """
+        }
+      } 
+    }
+
+    stage("Backend Quality Gate Check") {
       steps {
           timeout(time: 5, unit: 'MINUTES') {
               waitForQualityGate abortPipeline: true
