@@ -6,6 +6,10 @@ pipeline {
     SONAR_TOKEN = credentials('sonar_token')
   }
 
+  tools {
+    sonarQubeScanner 'sonar-scanner'
+  }
+
   stages {
 
     stage('Checkout') {
@@ -30,6 +34,7 @@ pipeline {
       steps {
           withSonarQubeEnv('sonar-server') {
               sh """
+              which sonar-scanner
               sonar-scanner \
                 -Dsonar.projectKey=fullstack-frontend \
                 -Dsonar.sources=frontend \
