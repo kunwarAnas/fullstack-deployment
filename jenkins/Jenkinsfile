@@ -97,14 +97,18 @@ pipeline {
     stage("Deploy to Kubernetes") {
       steps {
         echo "Deploying to Kubernetes cluster..."   
-        sh "kubectl get nodes"
-        withCredentials([file(credentialsId: 'kube_config', variable: 'KUBECONFIG')]) {
-            sh """
+        sh """
             kubectl get nodes
             kubectl set image deployment/python-backend-dep python-backend-dep=kunwaranas/fullstack-python:${BUILD_NUMBER} -n notes-app
             kubectl set image deployment/notes-app-dep notes-app-dep=kunwaranas/fullstack-react:${BUILD_NUMBER} -n notes-app
-            """
-        }
+          """
+        // withCredentials([file(credentialsId: 'kube_config', variable: 'KUBECONFIG')]) {
+        //     sh """
+        //     kubectl get nodes
+        //     kubectl set image deployment/python-backend-dep python-backend-dep=kunwaranas/fullstack-python:${BUILD_NUMBER} -n notes-app
+        //     kubectl set image deployment/notes-app-dep notes-app-dep=kunwaranas/fullstack-react:${BUILD_NUMBER} -n notes-app
+        //     """
+        // }
       }
     }
 
