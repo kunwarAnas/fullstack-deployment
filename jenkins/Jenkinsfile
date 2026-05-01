@@ -4,12 +4,13 @@ pipeline {
   environment {
     REGISTRY = 'docker.io/yourname'
     SONAR_TOKEN = credentials('sonar_token')
+    SONAR_HOME = tool 'sonar-scanner'
   }
 
-  tools {
-    sonarRunner 'sonar-scanner'
-  }
-  
+  // tools {
+  //   sonarRunner 'sonar-scanner'
+  // }
+
   stages {
 
     stage('Checkout') {
@@ -35,7 +36,8 @@ pipeline {
           withSonarQubeEnv('sonar-server') {
               sh """
               which sonar-scanner
-              sonar-scanner \
+              $SONAR_HOME/bin/sonar-scanner \
+                -Dsonar.projectName=Fullstack Frontend \
                 -Dsonar.projectKey=fullstack-frontend \
                 -Dsonar.sources=frontend \
                 -Dsonar.host.url=http://host.docker.internal:9000 \
